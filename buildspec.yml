@@ -22,8 +22,8 @@ phases:
       - ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
       - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
-      - echo "ECR URI: $ECR_URI"
-      - echo "Image tag: $IMAGE_TAG"
+      -  'echo "ECR URI: $ECR_URI"'
+- 'echo "Image tag: $IMAGE_TAG"'
 
   build:
     commands:
