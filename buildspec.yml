@@ -9,49 +9,49 @@ env:
 phases:
   install:
     commands:
-      - echo "Installing kubectl..."
-      - curl -LO "https://dl.k8s.io/release/v1.36.3/bin/linux/amd64/kubectl"
-      - chmod +x kubectl
-      - mv kubectl /usr/local/bin/kubectl
-      - kubectl version --client
+      - 'echo "Installing kubectl..."'
+      - 'curl -LO https://dl.k8s.io/release/v1.36.3/bin/linux/amd64/kubectl'
+      - 'chmod +x kubectl'
+      - 'mv kubectl /usr/local/bin/kubectl'
+      - 'kubectl version --client'
 
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
-      -  'echo "ECR URI: $ECR_URI"'
-- 'echo "Image tag: $IMAGE_TAG"'
+      - 'echo "Logging in to Amazon ECR..."'
+      - 'AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)'
+      - 'ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY'
+      - 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI'
+      - 'IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION'
+      - 'echo "ECR URI: $ECR_URI"'
+      - 'echo "Image tag: $IMAGE_TAG"'
 
   build:
     commands:
-      - echo "Building Docker image..."
-      - docker build -t $ECR_URI:$IMAGE_TAG .
-      - docker tag $ECR_URI:$IMAGE_TAG $ECR_URI:latest
+      - 'echo "Building Docker image..."'
+      - 'docker build -t $ECR_URI:$IMAGE_TAG .'
+      - 'docker tag $ECR_URI:$IMAGE_TAG $ECR_URI:latest'
 
   post_build:
     commands:
-      - echo "Pushing Docker image to ECR..."
-      - docker push $ECR_URI:$IMAGE_TAG
-      - docker push $ECR_URI:latest
-      - echo "Configuring kubectl for EKS..."
-      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
-      - echo "Updating Kubernetes deployment image..."
-      - sed -i "s|image: .*|image: $ECR_URI:$IMAGE_TAG|" k8s/deployment.yaml
-      - echo "Applying Kubernetes Deployment..."
-      - kubectl apply -f k8s/deployment.yaml
-      - echo "Applying Kubernetes Service..."
-      - kubectl apply -f k8s/service.yaml
-      - echo "Waiting for deployment rollout..."
-      - kubectl rollout status deployment/brain-tasks-app --timeout=180s
-      - echo "Deployment completed successfully!"
-      - kubectl get pods
-      - kubectl get service brain-tasks-service
+      - 'echo "Pushing Docker image to ECR..."'
+      - 'docker push $ECR_URI:$IMAGE_TAG'
+      - 'docker push $ECR_URI:latest'
+      - 'echo "Configuring kubectl for EKS..."'
+      - 'aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME'
+      - 'echo "Updating Kubernetes deployment image..."'
+      - 'sed -i "s|image: .*|image: $ECR_URI:$IMAGE_TAG|" k8s/deployment.yaml'
+      - 'echo "Applying Kubernetes Deployment..."'
+      - 'kubectl apply -f k8s/deployment.yaml'
+      - 'echo "Applying Kubernetes Service..."'
+      - 'kubectl apply -f k8s/service.yaml'
+      - 'echo "Waiting for deployment rollout..."'
+      - 'kubectl rollout status deployment/brain-tasks-app --timeout=180s'
+      - 'echo "Deployment completed successfully!"'
+      - 'kubectl get pods'
+      - 'kubectl get service brain-tasks-service'
 
 artifacts:
   files:
-    - k8s/deployment.yaml
-    - k8s/service.yaml
-    - Dockerfile
+    - 'k8s/deployment.yaml'
+    - 'k8s/service.yaml'
+    - 'Dockerfile'
